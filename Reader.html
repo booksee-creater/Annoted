@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dear Reader</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Lora&family=Caveat:wght@500&family=Special+Elite&display=swap');
+
+body{
+margin:0;
+font-family:Lora,serif;
+background:#fffdf0;
+color:#3a2f1f;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+}
+
+.screen{
+width:100%;
+max-width:600px;
+padding:30px;
+text-align:center;
+display:none;
+}
+
+.active{display:block;}
+
+h1{
+font-family:"Playfair Display",serif;
+font-size:40px;
+margin-bottom:10px;
+}
+
+.tagline{
+font-style:italic;
+color:#6f5e48;
+margin-bottom:30px;
+}
+
+input{
+padding:12px;
+font-size:16px;
+width:80%;
+border:1px solid #c9b79c;
+border-radius:6px;
+margin-bottom:20px;
+}
+
+button{
+padding:12px 20px;
+font-size:15px;
+border:none;
+background:#3f2d1b;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+.mood-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
+margin-top:20px;
+}
+
+.mood-chip{
+padding:10px;
+border-radius:20px;
+cursor:pointer;
+font-size:14px;
+}
+
+.page-wrapper{
+display:flex;
+justify-content:center;
+}
+
+.page{
+background:#fdf8f0;
+border:1px solid #e0d0b0;
+border-radius:4px;
+padding:2.5rem;
+line-height:1.9;
+max-width:420px;
+text-align:left;
+position:relative;
+box-shadow:0 6px 18px rgba(0,0,0,0.15);
+}
+
+.stamp{
+font-family:"Special Elite";
+color:#a13a2c;
+opacity:0.6;
+font-size:14px;
+transform:rotate(-3deg);
+margin-bottom:10px;
+}
+
+.chapter{
+font-family:"Playfair Display";
+font-size:18px;
+margin-bottom:15px;
+}
+
+.highlight{
+padding:2px 4px;
+border-radius:2px;
+}
+
+.margin-note{
+font-family:Caveat;
+font-size:14px;
+position:absolute;
+max-width:120px;
+}
+
+.footer{
+margin-top:20px;
+font-size:12px;
+color:#7c6c57;
+}
+
+.action-buttons{
+margin-top:20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="screen1" class="screen active">
+<h1>Dear Reader</h1>
+<div class="tagline">what the margins say about you today</div>
+<input id="username" placeholder="your name or reader alias">
+<br>
+<button onclick="goMood()">Open my page →</button>
+</div>
+
+<div id="screen2" class="screen">
+<h2>How are you feeling right now?</h2>
+<div id="moods" class="mood-grid"></div>
+</div>
+
+<div id="screen3" class="screen">
+<div class="page-wrapper">
+<div id="page" class="page"></div>
+</div>
+
+<div class="action-buttons">
+<button onclick="savePage()">Save my page 📸</button>
+<button onclick="backMood()">Try another mood ↩</button>
+</div>
+
+<div class="footer">
+Made with ✦ for readers everywhere · #DearReader #Bookstagram #BookTok
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+
+const prose={
+warm:`The morning felt lighter than expected, as if the world had quietly decided to forgive yesterday. 
+Somewhere in the distance someone was laughing, and it reminded her that joy rarely arrives loudly. 
+It simply appears beside you and waits to be noticed.
+
+There are days when the ordinary becomes luminous — when a cup of tea, a page of a novel, and the sun through a window feel like small miracles.
+
+She wondered if happiness was not something to chase, but something that had been waiting patiently all along.`,
+
+calm:`The afternoon unfolded slowly, like a well-loved chapter you return to again and again. 
+Outside the window the trees moved with a gentle certainty, as though they had never once doubted the rhythm of the seasons.
+
+Reading had always felt like borrowing another mind's quiet wisdom.
+
+And somewhere between the lines, she found a strange and comforting realization — that the world did not need to be solved all at once.`,
+
+heavy:`Evening arrived with a softness that almost felt like mercy. 
+The sky dimmed slowly, as though it understood that some days end more delicately than others.
+
+There are moments when the heart carries more than it knows how to say.
+
+But in the quiet between paragraphs, she felt something loosen — the fragile hope that even the heaviest feelings eventually become stories we survive.`};
+
+const moods={
+Happy:{emoji:"😊",cat:"warm",highlight:"#FFD966",ink:"#c0541a",edge:"#f5c842",bg:"#fffdf0",
+quotes:[
+"The most important thing is to enjoy your life — to be happy — it's all that matters. — Audrey Hepburn",
+"I have chosen to be happy because it is good for my health. — Voltaire",
+"Happiness is the secret to all beauty. — Christian Dior"],
+notes:["THIS is the energy I needed today ✦","read this on a Tuesday and it fixed me","the universe said yes and I said yes back","okay but why is this me"]},
+
+Cheerful:{emoji:"🌸",cat:"warm",highlight:"#ffe7a3",ink:"#b85c38",edge:"#ffd06a",bg:"#fffdf4",
+quotes:["Joy is the simplest form of gratitude. — Karl Barth","The sun himself is weak when he first rises. — Dickens","To be fond of dancing was a certain step toward falling in love. — Jane Austen"],
+notes:["this line is smiling","annotated with tea and sunshine","I love this book actually","pure serotonin"]},
+
+Playful:{emoji:"🎈",cat:"warm",highlight:"#ffd9b3",ink:"#c0582b",edge:"#ffb673",bg:"#fffaf4",
+quotes:["We are all in the gutter, but some of us are looking at the stars. — Oscar Wilde","The true object of all human life is play. — G.K. Chesterton","A little nonsense now and then is relished by the wisest men. — Roald Dahl"],
+notes:["this made me grin","chaotic but delightful","I giggled sorry","books are FUN actually"]},
+
+Grateful:{emoji:"💛",cat:"warm",highlight:"#fff0a8",ink:"#b97a1e",edge:"#e7d26a",bg:"#fffdf5",
+quotes:["Gratitude turns what we have into enough. — Aesop","Silent gratitude isn't much use to anyone. — G.B. Stern","Enjoy the little things. — Robert Brault"],
+notes:["thank you universe","reading this felt lucky","pause here and breathe","this moment matters"]},
+
+Loving:{emoji:"💖",cat:"warm",highlight:"#ffd1dc",ink:"#b33951",edge:"#ff9fb2",bg:"#fff6f8",
+quotes:["Whatever our souls are made of, his and mine are the same. — Emily Brontë","Love looks not with the eyes but with the mind. — Shakespeare","Where there is love there is life. — Gandhi"],
+notes:["romantic screaming","oh this line","heart = melted","book boyfriend energy"]},
+
+Calm:{emoji:"🌿",cat:"calm",highlight:"#dfeccf",ink:"#4c6b45",edge:"#b9d3a8",bg:"#f6fbf4",
+quotes:["Adopt the pace of nature: her secret is patience. — Emerson","Nature does not hurry, yet everything is accomplished. — Lao Tzu","There is pleasure in the pathless woods. — Byron"],
+notes:["reading slowly","peace in a paragraph","this breathes","gentle reminder"]},
+
+Hopeful:{emoji:"🕊️",cat:"calm",highlight:"#e7f3d6",ink:"#557c44",edge:"#c3e2a6",bg:"#f8fcf4",
+quotes:["Hope is the thing with feathers. — Emily Dickinson","Even the darkest night will end and the sun will rise. — Victor Hugo","Once you choose hope, anything’s possible. — Christopher Reeve"],
+notes:["needed this","hopeful margin","come back later","light returns"]},
+
+Dreamy:{emoji:"🌙",cat:"calm",highlight:"#e2dff6",ink:"#5a4b8a",edge:"#c6bfe8",bg:"#f6f5fb",
+quotes:["The world was hers for the reading. — Betty Smith","Dreams are the touchstones of our character. — Thoreau","All that we see or seem is but a dream within a dream. — Poe"],
+notes:["soft magic","reading under blankets","this feels like midnight","stars between lines"]},
+
+Curious:{emoji:"🔭",cat:"calm",highlight:"#e3f0ff",ink:"#3c5d8a",edge:"#a7c7e7",bg:"#f4f8fd",
+quotes:["I have no special talent. I am only passionately curious. — Einstein","The important thing is not to stop questioning. — Einstein","Curiosity is the wick in the candle of learning. — William Arthur Ward"],
+notes:["hmm interesting","note to self: research","brain activated","this idea though"]},
+
+Thoughtful:{emoji:"📚",cat:"calm",highlight:"#e8e3d8",ink:"#5c5140",edge:"#d0c5ad",bg:"#f8f6f2",
+quotes:["Reading is essential for those who seek to rise above the ordinary. — Jim Rohn","A room without books is like a body without a soul. — Cicero","Good friends, good books, and a sleepy conscience. — Twain"],
+notes:["pause here","thinking about this","underline forever","books teach gently"]},
+
+Balanced:{emoji:"⚖️",cat:"calm",highlight:"#e6eadf",ink:"#5c664e",edge:"#c8d1b7",bg:"#f7f9f4",
+quotes:["Happiness depends upon ourselves. — Aristotle","Everything in moderation. — Aristotle","The middle path is the way of wisdom. — Buddha"],
+notes:["steady mood","this feels right","balance restored","calm mind"]},
+
+Observant:{emoji:"👁️",cat:"calm",highlight:"#e7ecef",ink:"#566870",edge:"#c8d1d6",bg:"#f6f9fb",
+quotes:["The real voyage of discovery consists not in seeking new landscapes but in having new eyes. — Proust","We read to know we are not alone. — C.S. Lewis","Attention is the rarest form of generosity. — Simone Weil"],
+notes:["noticed this","tiny detail!","observing quietly","reader instincts"]},
+
+Okay:{emoji:"🤍",cat:"neutral",highlight:"#f0f0f0",ink:"#6a6a6a",edge:"#d6d6d6",bg:"#fafafa",
+quotes:["This too shall pass. — Persian Proverb","Life is what happens to us while we are making other plans. — Allen Saunders","Every day may not be good but there is something good in every day. — Alice Morse Earle"],
+notes:["just existing","today is neutral","reading anyway","that's enough"]},
+
+Quiet:{emoji:"🌫️",cat:"neutral",highlight:"#eaeaea",ink:"#666",edge:"#ccc",bg:"#f7f7f7",
+quotes:["Silence is a source of great strength. — Lao Tzu","The quieter you become the more you can hear. — Ram Dass","Solitude sometimes is best society. — Milton"],
+notes:["soft quiet","library mood","peaceful silence","stillness here"]},
+
+Focused:{emoji:"🧠",cat:"neutral",highlight:"#e0ecff",ink:"#3d4f8a",edge:"#b3c7ff",bg:"#f4f7ff",
+quotes:["Well begun is half done. — Aristotle","It always seems impossible until it's done. — Mandela","Energy flows where attention goes. — Tony Robbins"],
+notes:["deep focus","brain locked in","highlight this idea","productive reading"]},
+
+Busy:{emoji:"⏱️",cat:"neutral",highlight:"#ece7d9",ink:"#7a6848",edge:"#d9caa0",bg:"#f9f6ef",
+quotes:["Lost time is never found again. — Benjamin Franklin","The bad news is time flies. — Michael Altshuler","Time you enjoy wasting is not wasted time. — Bertrand Russell"],
+notes:["reading between tasks","quick annotation","bookmark this","life moving fast"]},
+
+Low:{emoji:"🌧️",cat:"heavy",highlight:"#b8d4e8",ink:"#2c4a6e",edge:"#8aafc8",bg:"#f0f4f8",
+quotes:["In the middle of winter I discovered an invincible summer. — Camus","Even the saddest things can become wisdom. — Frederick Buechner","She was a girl who knew how to be happy even when she was sad. — Marilyn Monroe"],
+notes:["this is permission to rest","crying but make it literary","the book knew","soft dog-ear"]},
+
+Tired:{emoji:"😮‍💨",cat:"heavy",highlight:"#e6d9c6",ink:"#6a5743",edge:"#cbb59d",bg:"#f7f3ed",
+quotes:["Rest when you're weary. — Helen Keller","Sleep is the best meditation. — Dalai Lama","There is virtue in work and there is virtue in rest. — Alan Cohen"],
+notes:["reading half asleep","pause here","rest reader","soft evening mood"]},
+
+Anxious:{emoji:"🌀",cat:"heavy",highlight:"#d4b8e0",ink:"#5c2d91",edge:"#b39dca",bg:"#f5f0fa",
+quotes:["I am not afraid of storms for I am learning how to sail. — Louisa May Alcott","Even the darkest night will end. — Victor Hugo","You gain strength by facing fear. — Eleanor Roosevelt"],
+notes:["my brain at 3am","put the book down","shaking hands","come back later"]},
+
+Bored:{emoji:"🥱",cat:"heavy",highlight:"#e0e0e0",ink:"#5c5c5c",edge:"#c8c8c8",bg:"#f6f6f6",
+quotes:["The cure for boredom is curiosity. — Dorothy Parker","Isn't it nice to think that tomorrow is a new day. — L.M. Montgomery","Boredom is the feeling that everything is a waste of time. — Tolstoy"],
+notes:["need plot twist","wake up book","hmm maybe later","reader slump"]},
+
+Irritated:{emoji:"🔥",cat:"heavy",highlight:"#ffd6d6",ink:"#8a2c2c",edge:"#ffaaaa",bg:"#fff5f5",
+quotes:["Speak when you are angry and you will make the best speech you will ever regret. — Ambrose Bierce","For every minute you are angry you lose sixty seconds of happiness. — Emerson","Anger is an acid that can do more harm to the vessel in which it is stored. — Mark Twain"],
+notes:["I DISAGREE","throwing the book","dramatic annotation","side-eye this line"]}
+};
+
+const moodsDiv=document.getElementById("moods");
+
+Object.keys(moods).forEach(name=>{
+let m=moods[name];
+let chip=document.createElement("div");
+chip.className="mood-chip";
+chip.style.background=m.highlight;
+chip.innerText=`${m.emoji} ${name}`;
+chip.onclick=()=>generate(name);
+moodsDiv.appendChild(chip);
+});
+
+function goMood(){
+if(!username.value)return;
+show("screen2");
+}
+
+function backMood(){show("screen2");}
+
+function show(id){
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+function rand(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+function generate(moodName){
+
+let m=moods[moodName];
+document.body.style.background=m.bg;
+
+let proseText=prose[m.cat];
+
+let quote=rand(m.quotes);
+let note1=rand(m.notes);
+let note2=rand(m.notes);
+let note3=rand(m.notes);
+let note4=rand(m.notes);
+
+let page=document.getElementById("page");
+
+page.style.borderLeft=`4px solid ${m.edge}`;
+
+page.innerHTML=`
+<div class="stamp">From the collection of ${username.value}</div>
+<div class="chapter">Chapter XII — What Remains · p.247</div>
+
+<p>${proseText}</p>
+
+<p><span class="highlight" style="background:${m.highlight}">${quote}</span></p>
+
+<p>Sometimes the smallest sentence in a book becomes the one you carry with you for years.</p>
+
+<p><span style="text-decoration:underline">There is always another page.</span></p>
+
+<div class="margin-note" style="top:120px;right:-110px;transform:rotate(-3deg);color:${m.ink}">${note1}</div>
+<div class="margin-note" style="top:220px;right:-120px;transform:rotate(2deg);color:${m.ink}">${note2}</div>
+<div class="margin-note" style="top:160px;left:-110px;transform:rotate(-2deg);color:${m.ink}">${note3}</div>
+<div class="margin-note" style="top:320px;left:-100px;transform:rotate(3deg);color:${m.ink}">${note4}</div>
+
+`;
+
+currentMood=moodName;
+
+show("screen3");
+}
+
+let currentMood="";
+
+function savePage(){
+html2canvas(document.getElementById("page")).then(canvas=>{
+let link=document.createElement("a");
+link.download=`dear-reader-${currentMood}.png`;
+link.href=canvas.toDataURL();
+link.click();
+});
+}
+
+</script>
+</body>
+</html>
